@@ -48,11 +48,11 @@ KM_CENSORING = (0.3, 0.7)
 
 # Shared plot styling (kept consistent with validate.py).
 DEP_STYLES = {
-    "protocol_km": ("Protocol (age-cond., flat KM tail)", "o-", "#1b6ca8"),
-    "protocol_weib": ("Protocol (age-cond., Weibull tail)", "o:", "#0e3d5c"),
-    "age_naive_cat": ("Category-specific age-naive", "s--", "#e28743"),
-    "accounting_only": ("Accounting-only", "d--", "#7d8f69"),
-    "censor_at_end": ("Censor-at-end", "^--", "#c0392b"),
+    "protocol_km": ("Protocol (age-cond., flat KM tail)", "o-", "#0072B2"),
+    "protocol_weib": ("Protocol (age-cond., Weibull tail)", "o:", "#56B4E9"),
+    "age_naive_cat": ("Category-specific age-naive", "s--", "#E69F00"),
+    "accounting_only": ("Accounting-only", "d--", "#CC79A7"),
+    "censor_at_end": ("Censor-at-end", "^--", "#D55E00"),
 }
 
 

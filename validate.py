@@ -516,12 +516,13 @@ def make_figure2(dep, path):
     pc = dep["per_cell"]
     x = pc["realised_censoring_mean"].values
     fig, ax = plt.subplots(figsize=(7.6, 5.2))
+    # Wong colourblind-safe palette; marker + line style also disambiguate (grayscale-safe).
     styles = {
-        "protocol_km": ("Protocol (age-cond., flat KM tail)", "o-", "#1b6ca8"),
-        "protocol_weib": ("Protocol (age-cond., Weibull tail)", "o:", "#0e3d5c"),
-        "age_naive_cat": ("Category-specific age-naive", "s--", "#e28743"),
-        "accounting_only": ("Accounting-only", "d--", "#7d8f69"),
-        "censor_at_end": ("Censor-at-end", "^--", "#c0392b"),
+        "protocol_km": ("Protocol (age-cond., flat KM tail)", "o-", "#0072B2"),
+        "protocol_weib": ("Protocol (age-cond., Weibull tail)", "o:", "#56B4E9"),
+        "age_naive_cat": ("Category-specific age-naive", "s--", "#E69F00"),
+        "accounting_only": ("Accounting-only", "d--", "#CC79A7"),
+        "censor_at_end": ("Censor-at-end", "^--", "#D55E00"),
     }
     for m, (lab, sty, col) in styles.items():
         ax.errorbar(x, pc[f"mae_{m}_mean"].values, yerr=pc[f"mae_{m}_ci"].values,
@@ -650,18 +651,26 @@ def make_figure4(inv, path):
 def make_figure_tie(tie_df, path):
     """Exponential near-tie panel: protocol vs age-naive advantage, two regimes."""
     fig, ax = plt.subplots(figsize=(7.6, 5.0))
-    for fam, col, mk in [("weibull", "#1b6ca8", "o-"), ("exponential", "#c0392b", "s--")]:
+    for fam, col, mk in [("weibull", "#0072B2", "o-"), ("exponential", "#D55E00", "s--")]:
         sub = tie_df[tie_df.dwell_family == fam].sort_values("target_censoring")
-        ax.errorbar(sub["target_censoring"], sub["protocol_advantage_pct"],
+        # 95% CI on the paired MAE difference, expressed as % of the age-naive MAE.
+        yerr = 100.0 * sub["mae_diff_ci"].values / sub["mae_age_naive_cat"].values
+        ax.errorbar(sub["target_censoring"], sub["protocol_advantage_pct"], yerr=yerr,
                     fmt=mk, color=col, capsize=3, linewidth=1.8, markersize=7,
                     label="%s time-on-shelf" % fam)
+        if fam == "exponential":
+            pas = sub[sub["no_advantage_pass"] == True]
+            ax.scatter(pas["target_censoring"], pas["protocol_advantage_pct"],
+                       s=150, facecolors="none", edgecolors="#2e7d32", linewidths=1.8,
+                       zorder=6, label="falsification passes (no advantage)")
     ax.axhline(0, color="gray", linewidth=1.0, linestyle=":")
     ax.set_xlabel("Realised right-censoring rate")
-    ax.set_ylabel("Protocol advantage over category age-naive (% MAE reduction)")
+    ax.set_ylabel("Protocol advantage over category age-naive\n"
+                  "(% MAE reduction; error bars = 95% paired-difference CI)")
     ax.set_title("Figure 5. Falsification control\n"
                  "Weibull: protocol helps.  Exponential (memoryless): no advantage.")
     ax.grid(True, alpha=0.3)
-    ax.legend(frameon=False)
+    ax.legend(frameon=False, fontsize=8.5)
     fig.tight_layout()
     fig.savefig(path, dpi=600)
     plt.close(fig)
@@ -763,11 +772,47 @@ def make_figure_misspec(miss, path, censoring_levels=None):
     fig.legend(handles_ref, [labels[t] for t in tails],
                frameon=False, ncol=4, fontsize=9, loc="lower center",
                bbox_to_anchor=(0.5, -0.01))
-    fig.suptitle("Figure 6. Tail misspecification: depletion MAE by data-generating "
+    fig.suptitle("Figure 6. Tail misspecification: depletion mean MAE by data-generating "
                  "family x tail model\n(hatched = tail matches the DGP; gamma matches "
-                 "neither parametric tail; dotted line = flat Kaplan-Meier MAE, "
-                 "no parametric tail exceeds it in any cell)", fontsize=10.5)
+                 "neither parametric tail; dotted line = flat Kaplan-Meier mean MAE; "
+                 "no parametric tail has higher mean MAE in any cell)", fontsize=10.5)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+    fig.savefig(path, dpi=600)
+    plt.close(fig)
+
+
+def make_figure_envelope(miss, path):
+    """Figure 7 (operating-envelope diagnostic): the runtime unsupported-query share vs
+    realised censoring, by data-generating family. This is the observable signal that
+    governs the flat-vs-parametric tail choice (Section 2.6): a small share means the flat
+    Kaplan-Meier tail is adequate within supported horizons; as the share grows past about
+    one half, a parametric tail selected by held-out calibration is preferred. Same numbers
+    as table_misspecification.csv (no recomputation)."""
+    pc = miss["per_cell"]
+    dgp_lab = {"weibull": "Weibull", "lognormal": "log-normal", "gamma": "gamma"}
+    dgp_col = {"weibull": "#0072B2", "lognormal": "#E69F00", "gamma": "#009E73"}
+    dgp_mk = {"weibull": "o-", "lognormal": "s--", "gamma": "^-."}
+    fig, ax = plt.subplots(figsize=(7.4, 5.0))
+    ax.axhspan(0.0, 0.5, color="#2e7d32", alpha=0.06)
+    ax.axhspan(0.5, 1.0, color="#D55E00", alpha=0.06)
+    ax.axhline(0.5, color="gray", linestyle=":", linewidth=1.0)
+    for dgp in list(DGP_FAMILIES):
+        sub = pc[pc["dgp"] == dgp].sort_values("realised_censoring_mean")
+        ax.plot(sub["realised_censoring_mean"], sub["unsupported_share_mean"],
+                dgp_mk[dgp], color=dgp_col[dgp], linewidth=1.9, markersize=7,
+                label=dgp_lab[dgp])
+    ax.set_xlabel("Realised right-censoring rate")
+    ax.set_ylabel("Unsupported-query share\n(current-stock queries with a+h beyond Kaplan-Meier support)")
+    ax.set_ylim(0.0, 1.0)
+    ax.text(0.985, 0.30, "flat KM tail adequate\n(within supported horizons)",
+            transform=ax.transAxes, ha="right", va="center", fontsize=8.5, color="#2e7d32")
+    ax.text(0.985, 0.72, "over half unsupported:\nparametric tail preferred",
+            transform=ax.transAxes, ha="right", va="center", fontsize=8.5, color="#a5451f")
+    ax.set_title("Figure 7. Operating-envelope diagnostic: the unsupported-query share\n"
+                 "governs the flat-vs-parametric tail choice (Section 2.6)")
+    ax.grid(True, alpha=0.3)
+    ax.legend(frameon=False, title="data-generating family", fontsize=9, loc="upper left")
+    fig.tight_layout()
     fig.savefig(path, dpi=600)
     plt.close(fig)
 
@@ -1049,6 +1094,7 @@ def main():
     make_figure4(inv, os.path.join(HERE, "figure4_inventory_curves.png"))
     make_figure_tie(tie, os.path.join(HERE, "figure5_exponential_tie.png"))
     make_figure_misspec(miss, os.path.join(HERE, "figure6_misspecification.png"))
+    make_figure_envelope(miss, os.path.join(HERE, "figure7_operating_envelope.png"))
     make_figure_km(os.path.join(HERE, "figure_km_curve.png"))
     make_figure_stress(stress, os.path.join(HERE, "figureA1_stress_scale_inflation.png"))
     print("  -> figure2_depletion_mae.png, figure2b_depletion_curve.png,")

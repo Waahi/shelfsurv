@@ -65,6 +65,7 @@ The run is deterministic (each replication uses `seed = BASE_SEED + rep_index`; 
 | `figure4_inventory_curves.png` | Figure 4 | True vs reconstructed month-end stock; net-flow bias under left-truncation |
 | `figure5_exponential_tie.png` | Figure 5 | Memoryless (exponential) falsification control |
 | `figure6_misspecification.png` | Figure 6 | Tail misspecification study across censoring levels (Weibull / log-normal / gamma x flat / Weibull / log-normal tails) |
+| `figure7_operating_envelope.png` | Figure 7 | Operating-envelope diagnostic: unsupported-query share vs censoring, by data-generating family |
 | `figureA1_stress_scale_inflation.png` | Supplementary Figure A1 | Time-on-shelf scale-inflation stress test (alternative design) |
 | `table_depletion_mae.csv` | Table 3 | Depletion MAE by horizon x censoring |
 | `table_dwell_bias.csv` | Table 4 | Time-on-shelf bias by censoring |
