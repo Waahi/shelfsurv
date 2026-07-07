@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the article and this software record."
+title: "shelfsurv: a censoring-aware protocol for stock, time-on-shelf, and inventory-depletion reconstruction from unique-item resale event logs"
+abstract: >-
+  Reference implementation and reproducibility package for a MethodsX method
+  article. Reconstructs month-end stock (accounting identity), censoring-aware
+  time-on-shelf (Kaplan-Meier, Greenwood, RMST), and age-conditioned
+  inventory-depletion projection with a non-circular held-out-calibration
+  tail-selection rule, validated on synthetic data.
+type: software
+authors:
+  - family-names: Shao
+    given-names: Tengfei
+    affiliation: "Global Education Center, Waseda University, Tokyo, Japan"
+  - family-names: Goto
+    given-names: Masayuki
+    affiliation: "School of Creative Science and Engineering, Waseda University, Tokyo, Japan"
+version: "1.0.0"
+date-released: "2026-07-07"
+license: MIT
+keywords:
+  - inventory reconstruction
+  - time-on-shelf
+  - right-censoring
+  - survival analysis
+  - resale
+  - synthetic validation
+preferred-citation:
+  type: article
+  title: "A censoring-aware protocol for reconstructing stock, time-on-shelf, and depletion from unique-item resale event logs"
+  authors:
+    - family-names: Shao
+      given-names: Tengfei
+    - family-names: Goto
+      given-names: Masayuki
+  journal: "MethodsX"
+  year: 2026
