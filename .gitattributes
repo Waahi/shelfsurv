@@ -1,0 +1,7 @@
+# Consistent line endings across platforms
+* text=auto
+
+# Binary assets (figures, archives) — never normalize
+*.png binary
+*.pdf binary
+*.zip binary
