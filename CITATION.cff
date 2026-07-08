@@ -30,8 +30,8 @@ identifiers:
     value: 10.5281/zenodo.21244011
     description: "Concept DOI (all versions, resolves to the latest release)"
   - type: doi
-    value: 10.5281/zenodo.21244012
-    description: "Version 1.0.0"
+    value: 10.5281/zenodo.21252852
+    description: "Version 1.1.0"
 preferred-citation:
   type: article
   title: "A censoring-aware protocol for reconstructing stock, time-on-shelf, and depletion from unique-item resale event logs"

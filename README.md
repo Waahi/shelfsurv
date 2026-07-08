@@ -103,7 +103,7 @@ If you use this software, please cite the article and the software record (see `
 
 > Shao, T., & Goto, M. (2026). *A censoring-aware protocol for reconstructing stock, time-on-shelf, and depletion from unique-item resale event logs.* MethodsX.
 
-For exact reproduction, cite the version DOI of the archived `v1.0.0` release (10.5281/zenodo.21244012); for the evolving software record, cite the all-versions concept DOI (10.5281/zenodo.21244011), which always resolves to the latest release.
+For exact reproduction, cite the version DOI of the archived `v1.1.0` release (10.5281/zenodo.21252852); for the evolving software record, cite the all-versions concept DOI (10.5281/zenodo.21244011), which always resolves to the latest release.
 
 ## Funding
 
