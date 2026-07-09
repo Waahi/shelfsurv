@@ -31,7 +31,7 @@ E1  Honesty assert   : reconstruct_stock == true monthly stock EXACTLY (holds at
                        ALL censoring rates -- censored items are counted in stock).
 E2  Time-on-shelf bias (Fig3): sold-only / censor-at-end / KM median and RMST bias
                        vs censoring, relative to the TRUE fixed time-on-shelf distribution.
-E3  Depletion (Fig2) : per-cell depletion MAE (fraction of current stock) of the
+E3  Depletion (Fig4) : per-cell depletion MAE (fraction of current stock) of the
                        protocol vs category-specific age-naive vs accounting-only
                        vs censor-at-end, flat KM tail (headline) + Weibull tail.
 E3t Exponential tie  : under memoryless time-on-shelf the age-conditioned protocol must
@@ -201,7 +201,7 @@ def experiment_dwell_bias():
 
 
 # ==============================================================================
-# E3 -- Depletion-forecast accuracy vs censoring (Figure 2, headline)
+# E3 -- Depletion-forecast accuracy vs censoring (Figure 4, headline)
 # ==============================================================================
 
 def experiment_depletion(dwell_family="weibull"):
@@ -225,7 +225,7 @@ def experiment_depletion(dwell_family="weibull"):
         acc_h = None
         acc_ncur = 0.0
         n_used = 0
-        # per-replication stacks (reps on the reference grid) for the Fig-2b IQR band
+        # per-replication stacks (reps on the reference grid) for the Fig-4b IQR band
         stack_km = []
         stack_true = []
         for r in range(N_REPS):
@@ -512,7 +512,7 @@ def experiment_stress_scale_inflation(n_reps=60):
 # ==============================================================================
 
 def make_figure2(dep, path):
-    """Figure 2 (HEADLINE): window-induced depletion MAE vs censoring."""
+    """Figure 4 (HEADLINE): window-induced depletion MAE vs censoring."""
     pc = dep["per_cell"]
     x = pc["realised_censoring_mean"].values
     fig, ax = plt.subplots(figsize=(7.6, 5.2))
@@ -522,14 +522,14 @@ def make_figure2(dep, path):
         "protocol_weib": ("Protocol (age-cond., Weibull tail)", "o:", "#56B4E9"),
         "age_naive_cat": ("Category-specific age-naive", "s--", "#E69F00"),
         "accounting_only": ("Accounting-only", "d--", "#CC79A7"),
-        "censor_at_end": ("Censor-at-end", "^--", "#D55E00"),
+        "censor_at_end": ("Censor-at-end", "^-.", "#D55E00"),
     }
     for m, (lab, sty, col) in styles.items():
         ax.errorbar(x, pc[f"mae_{m}_mean"].values, yerr=pc[f"mae_{m}_ci"].values,
                     fmt=sty, color=col, capsize=3, label=lab, linewidth=1.7, markersize=6)
     ax.set_xlabel("Realised right-censoring rate (window-induced)")
     ax.set_ylabel("Depletion-forecast MAE\n(fraction of current stock; horizons capped at window length)")
-    ax.set_title("Figure 2. Forward depletion-forecast accuracy vs censoring\n"
+    ax.set_title("Figure 4. Forward depletion-forecast accuracy vs censoring\n"
                  "(fixed realistic time-on-shelf; N=%d reps/cell)" % N_REPS)
     ax.grid(True, alpha=0.3)
     ax.legend(frameon=False, fontsize=8.5)
@@ -540,7 +540,7 @@ def make_figure2(dep, path):
 
 def make_figure2b(dep, path, censoring_value=0.3):
     """
-    Figure 2 panel B (companion to Figure 2): predicted-vs-true depletion overlay for
+    Figure 4 panel B (companion to Figure 4): predicted-vs-true depletion overlay for
     a representative censoring cell. The protocol's projected remaining current stock
     Ihat_remain(W+h) (flat KM tail) is plotted against the true remaining stock over
     the forecast horizon h, with a shaded inter-quartile (IQR) band across the
@@ -571,7 +571,7 @@ def make_figure2b(dep, path, censoring_value=0.3):
             label="projected remaining stock (protocol, flat KM tail)")
     ax.set_xlabel("horizon h (days)")
     ax.set_ylabel("current stock remaining")
-    ax.set_title("Figure 2 (panel B). Projected vs true depletion of current stock\n"
+    ax.set_title("Figure 4 (panel B). Projected vs true depletion of current stock\n"
                  "at ~%.0f%% censoring (median over reps; current stock ~%.0f items)"
                  % (target * 100, cv["n_current"]))
     ax.grid(True, alpha=0.3)
@@ -625,7 +625,7 @@ def make_figure4(inv, path):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.8, 4.8))
     me = rep["month_ends"]
     ax1.plot(me, rep["true"], "k-", linewidth=2.4, label="TRUE stock")
-    ax1.plot(me, rep["reconstructed"], "o", color="#1b6ca8", markersize=4, label="Reconstructed (Step 1)")
+    ax1.plot(me, rep["reconstructed"], "o", color="#0072B2", markersize=4, label="Reconstructed (Step 1)")
     ax1.set_xlabel("Month end"); ax1.set_ylabel("Items in stock")
     ax1.set_title("Step-1 reconstruction, full history\n(exact overlay)")
     ax1.grid(True, alpha=0.3); ax1.legend(frameon=False)
@@ -633,8 +633,8 @@ def make_figure4(inv, path):
         l.set_rotation(45); l.set_ha("right")
     me2 = lt["month_ends"]
     ax2.plot(me2, lt["true"], "k-", linewidth=2.4, label="TRUE stock")
-    ax2.plot(me2, lt["reconstructed"], "o-", color="#1b6ca8", markersize=3, label="Full reconstruction")
-    ax2.plot(me2, lt["zero_opening_net_flow"], "s--", color="#c0392b", markersize=3,
+    ax2.plot(me2, lt["reconstructed"], "o", color="#0072B2", markersize=4, label="Reconstructed (Step 1)")
+    ax2.plot(me2, lt["zero_opening_net_flow"], "s--", color="#D55E00", markersize=3,
              label="Zero-opening net-flow (b3)")
     ax2.set_xlabel("Month end"); ax2.set_ylabel("Items in stock")
     ax2.set_title("Left-truncation: net-flow underestimates stock\n"
@@ -642,7 +642,11 @@ def make_figure4(inv, path):
     ax2.grid(True, alpha=0.3); ax2.legend(frameon=False)
     for l in ax2.get_xticklabels():
         l.set_rotation(45); l.set_ha("right")
-    fig.suptitle("Figure 4. Inventory-curve reconstruction and opening-stock bias")
+    ax1.text(-0.09, 1.02, "A", transform=ax1.transAxes, fontsize=14,
+             fontweight="bold", ha="right", va="bottom")
+    ax2.text(-0.09, 1.02, "B", transform=ax2.transAxes, fontsize=14,
+             fontweight="bold", ha="right", va="bottom")
+    fig.suptitle("Figure 2. Inventory-curve reconstruction and opening-stock bias")
     fig.tight_layout(rect=[0, 0, 1, 0.95])
     fig.savefig(path, dpi=600)
     plt.close(fig)
@@ -657,7 +661,7 @@ def make_figure_tie(tie_df, path):
         yerr = 100.0 * sub["mae_diff_ci"].values / sub["mae_age_naive_cat"].values
         ax.errorbar(sub["target_censoring"], sub["protocol_advantage_pct"], yerr=yerr,
                     fmt=mk, color=col, capsize=3, linewidth=1.8, markersize=7,
-                    label="%s time-on-shelf" % fam)
+                    label="%s time-on-shelf" % fam.capitalize())
         if fam == "exponential":
             pas = sub[sub["no_advantage_pass"] == True]
             ax.scatter(pas["target_censoring"], pas["protocol_advantage_pct"],
@@ -668,7 +672,7 @@ def make_figure_tie(tie_df, path):
     ax.set_ylabel("Protocol advantage over category age-naive\n"
                   "(% MAE reduction; error bars = 95% paired-difference CI)")
     ax.set_title("Figure 5. Falsification control\n"
-                 "Weibull: protocol helps.  Exponential (memoryless): no advantage.")
+                 "Weibull: protocol helps. Exponential (memoryless): no advantage.")
     ax.grid(True, alpha=0.3)
     ax.legend(frameon=False, fontsize=8.5)
     fig.tight_layout()
@@ -681,10 +685,10 @@ def make_figure_stress(stress_df, path):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.8, 4.8))
     x = stress_df["realised_censoring_mean"].values
     for m, lab, sty, col in [
-        ("protocol_km", "Protocol (flat KM tail)", "o-", "#1b6ca8"),
-        ("age_naive_cat", "Category age-naive", "s--", "#e28743"),
-        ("accounting_only", "Accounting-only", "d--", "#7d8f69"),
-        ("censor_at_end", "Censor-at-end", "^--", "#c0392b"),
+        ("protocol_km", "Protocol (flat KM tail)", "o-", "#0072B2"),
+        ("age_naive_cat", "Category age-naive", "s--", "#E69F00"),
+        ("accounting_only", "Accounting-only", "d-.", "#CC79A7"),
+        ("censor_at_end", "Censor-at-end", "^:", "#D55E00"),
     ]:
         ax1.errorbar(x, stress_df[f"mae_{m}_mean"], yerr=stress_df[f"mae_{m}_ci"],
                      fmt=sty, color=col, capsize=3, label=lab, linewidth=1.7, markersize=6)
@@ -693,8 +697,8 @@ def make_figure_stress(stress_df, path):
     ax1.set_title("Time-on-shelf scale-inflation (alternative design), fixed window")
     ax1.grid(True, alpha=0.3); ax1.legend(frameon=False, fontsize=8.5)
 
-    ax2.plot(x, stress_df["watch_median_days"], "o-", color="#7d1f3d", label="watch true median")
-    ax2.plot(x, stress_df["accessory_median_days"], "s-", color="#1b6ca8", label="accessory true median")
+    ax2.plot(x, stress_df["watch_median_days"], "o-", color="#CC79A7", label="watch true median")
+    ax2.plot(x, stress_df["accessory_median_days"], "s-", color="#0072B2", label="accessory true median")
     ax2.set_xlabel("Realised right-censoring rate")
     ax2.set_ylabel("Inflated TRUE median time-on-shelf (days)")
     ax2.set_title("Why it is not the main design:\ntime-on-shelf inflates with censoring (unrealistic)")
@@ -769,13 +773,17 @@ def make_figure_misspec(miss, path, censoring_levels=None):
                 ax.set_ylabel("cens ~%.0f%%\nMAE" % (c * 100), fontsize=8.5)
             if ri == 0:
                 ax.set_title(dgp_title[dgp], fontsize=9.5)
-    fig.legend(handles_ref, [labels[t] for t in tails],
+    # Solid colour swatches (colour = tail model); the hatch=matched and dotted=flat-KM
+    # meanings are defined in the subtitle, so the legend must NOT bake the hatch into
+    # the Weibull-tail swatch.
+    from matplotlib.patches import Patch
+    tail_handles = [Patch(facecolor=colors[t], edgecolor="black", linewidth=0.5) for t in tails]
+    fig.legend(tail_handles, [labels[t] for t in tails],
                frameon=False, ncol=4, fontsize=9, loc="lower center",
                bbox_to_anchor=(0.5, -0.01))
     fig.suptitle("Figure 6. Tail misspecification: depletion mean MAE by data-generating "
-                 "family x tail model\n(hatched = tail matches the DGP; gamma matches "
-                 "neither parametric tail; dotted line = flat Kaplan-Meier mean MAE; "
-                 "no parametric tail has higher mean MAE in any cell)", fontsize=10.5)
+                 "family x tail model\n(hatched = matched tail; dotted line = flat KM mean "
+                 "MAE; no parametric tail has higher mean MAE in any cell)", fontsize=10.5)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     fig.savefig(path, dpi=600)
     plt.close(fig)
@@ -800,7 +808,7 @@ def make_figure_envelope(miss, path):
         sub = pc[pc["dgp"] == dgp].sort_values("realised_censoring_mean")
         ax.plot(sub["realised_censoring_mean"], sub["unsupported_share_mean"],
                 dgp_mk[dgp], color=dgp_col[dgp], linewidth=1.9, markersize=7,
-                label=dgp_lab[dgp])
+                markeredgecolor="white", markeredgewidth=0.6, label=dgp_lab[dgp])
     ax.set_xlabel("Realised right-censoring rate")
     ax.set_ylabel("Unsupported-query share\n(current-stock queries with a+h beyond Kaplan-Meier support)")
     ax.set_ylim(0.0, 1.0)
@@ -809,7 +817,7 @@ def make_figure_envelope(miss, path):
     ax.text(0.985, 0.72, "over half unsupported:\nparametric tail preferred",
             transform=ax.transAxes, ha="right", va="center", fontsize=8.5, color="#a5451f")
     ax.set_title("Figure 7. Operating-envelope diagnostic: the unsupported-query share\n"
-                 "governs the flat-vs-parametric tail choice (Section 2.6)")
+                 "governs the flat-versus-parametric tail choice")
     ax.grid(True, alpha=0.3)
     ax.legend(frameon=False, title="data-generating family", fontsize=9, loc="upper left")
     fig.tight_layout()
@@ -895,7 +903,7 @@ def make_figure_km(path, censoring_pair=(0.3, 0.7), rep_index=0):
         ax.grid(True, alpha=0.3)
     axes[0].set_ylabel("survival S(t)")
     axes[0].legend(frameon=False, fontsize=8.5, loc="upper right")
-    fig.suptitle("Figure. Estimated Kaplan-Meier time-on-shelf survival vs the true "
+    fig.suptitle("Figure 3A. Estimated Kaplan-Meier time-on-shelf survival vs the true "
                  "survival\n(censoring-aware KM with Greenwood band recovers the truth; "
                  "sold-only is biased downward)", fontsize=11)
     fig.tight_layout(rect=[0, 0, 1, 0.94])
@@ -949,7 +957,7 @@ def main():
     print("  -> wrote table_dwell_bias.csv")
 
     # ---- E3 headline (weibull) ---------------------------------------------
-    print("\n[E3] DEPLETION-FORECAST MAE vs CENSORING (Figure 2 HEADLINE, Weibull time-on-shelf)")
+    print("\n[E3] DEPLETION-FORECAST MAE vs CENSORING (Figure 4 HEADLINE, Weibull time-on-shelf)")
     dep = experiment_depletion(dwell_family="weibull")
     pcd = dep["per_cell"]
     print("  Depletion MAE (fraction of current stock; horizons capped at window):")
@@ -1061,7 +1069,7 @@ def main():
                  row["matched_tail"]))
 
     # ---- E4 -----------------------------------------------------------------
-    print("\n[E4] INVENTORY-CURVE RECONSTRUCTION + LEFT-TRUNCATION BIAS (Figure 4)")
+    print("\n[E4] INVENTORY-CURVE RECONSTRUCTION + LEFT-TRUNCATION BIAS (Figure 2)")
     inv = experiment_inventory_curves()
     lt, rep = inv["lt"], inv["rep"]
     exact_rep = bool(np.all(rep["reconstructed"] == rep["true"]))

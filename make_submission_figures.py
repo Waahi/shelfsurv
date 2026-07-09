@@ -3,7 +3,7 @@ make_submission_figures.py -- Build the two COMBINED, submission-ready panel fig
 that the MethodsX manuscript cites, each as one 600-dpi PNG with bold "A"/"B" panel
 labels.
 
-    Figure_2.png
+    Figure_4.png
       Panel A : depletion-forecast MAE vs censoring (read from table_depletion_mae.csv;
                 protocol flat-KM and Weibull tails, category-specific age-naive,
                 accounting-only, censor-at-end; 95% CI half-widths as error bars).
@@ -18,8 +18,8 @@ labels.
       Panel B : time-on-shelf bias vs censoring (read from table_dwell_bias.csv;
                 sold-only median, censor-at-end median, KM median, RMST(120)).
 
-The aggregate panels (2A, 3B) READ the tabled CSVs so they match the manuscript exactly
-and run instantly; the overlay (2B) and KM (3A) reproduce the harness logic on a few
+The aggregate panels (4A, 3B) READ the tabled CSVs so they match the manuscript exactly
+and run instantly; the overlay (4B) and KM (3A) reproduce the harness logic on a few
 replications with the SAME deterministic seeds as validate.py. This script does NOT
 re-run the 200-replication experiments, does NOT write or modify any CSV, and does NOT
 overwrite the per-panel figure*.png files.
@@ -42,7 +42,7 @@ import validate as V   # for BASE_SEED, CI_Z, _window_horizons, _km_step_arrays
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-N_REPS_OVERLAY = 40          # fast reproduction of the Fig-2b IQR band (deterministic)
+N_REPS_OVERLAY = 40          # fast reproduction of the Fig-4b IQR band (deterministic)
 OVERLAY_CENSORING = 0.3
 KM_CENSORING = (0.3, 0.7)
 
@@ -52,7 +52,7 @@ DEP_STYLES = {
     "protocol_weib": ("Protocol (age-cond., Weibull tail)", "o:", "#56B4E9"),
     "age_naive_cat": ("Category-specific age-naive", "s--", "#E69F00"),
     "accounting_only": ("Accounting-only", "d--", "#CC79A7"),
-    "censor_at_end": ("Censor-at-end", "^--", "#D55E00"),
+    "censor_at_end": ("Censor-at-end", "^-.", "#D55E00"),
 }
 
 
@@ -63,7 +63,7 @@ def _panel_label(ax, text):
 
 
 # ==============================================================================
-# Panel 2A -- depletion MAE vs censoring, read from the CSV (exact, fast).
+# Panel 4A -- depletion MAE vs censoring, read from the CSV (exact, fast).
 # ==============================================================================
 
 def _plot_panel_depletion_mae(ax):
@@ -82,7 +82,7 @@ def _plot_panel_depletion_mae(ax):
 
 
 # ==============================================================================
-# Panel 2B -- predicted-vs-true depletion overlay with IQR band (few reps).
+# Panel 4B -- predicted-vs-true depletion overlay with IQR band (few reps).
 # Reproduces validate.make_figure2b logic exactly, on N_REPS_OVERLAY reps.
 # ==============================================================================
 
@@ -208,15 +208,17 @@ def _plot_km_axis(ax, censoring, rep_index=0, show_legend=False):
 def _plot_panel_tos_bias(ax):
     df = pd.read_csv(os.path.join(HERE, "table_dwell_bias.csv"))
     x = df["realised_censoring_mean"].values
+    # KM median and RMST(120) both sit at ~0 and coincide; give KM median a white-filled
+    # (open) marker so it stays visible under the RMST(120) diamonds rather than occluded.
     series = [
-        ("soldonly_median", "Sold-only median", "s-", "#c0392b"),
-        ("censoratend_median", "Censor-at-end median", "^-", "#e28743"),
-        ("km_median", "KM median", "o-", "#1b6ca8"),
-        ("km_rmst120", "KM RMST(120 d)", "D:", "#0e3d5c"),
+        ("soldonly_median", "Sold-only median", "s-", "#c0392b", "#c0392b"),
+        ("censoratend_median", "Censor-at-end median", "^-", "#e28743", "#e28743"),
+        ("km_median", "KM median", "o-", "#1b6ca8", "white"),
+        ("km_rmst120", "KM RMST(120 d)", "D:", "#0e3d5c", "#0e3d5c"),
     ]
-    for est, lab, sty, col in series:
+    for est, lab, sty, col, mfc in series:
         ax.errorbar(x, df[f"pct_{est}_mean"].values, yerr=df[f"pct_{est}_ci"].values,
-                    fmt=sty, color=col, capsize=3, label=lab,
+                    fmt=sty, color=col, markerfacecolor=mfc, capsize=3, label=lab,
                     linewidth=1.8, markersize=6)
     ax.axhline(0, color="gray", linewidth=1.0, linestyle=":")
     ax.set_xlabel("Realised right-censoring rate")
@@ -270,13 +272,13 @@ def _dpi_of(path):
 
 def main():
     print("=" * 78)
-    print("Building combined submission figures (Figure_2.png, Figure_3.png)")
+    print("Building combined submission figures (Figure_4.png, Figure_3.png)")
     print("  reading CSV tables for aggregate panels; reproducing overlay/KM on")
     print("  %d reps / same seeds (no 200-rep re-run; no CSV or figure*.png change)."
           % N_REPS_OVERLAY)
     print("=" * 78)
 
-    f2 = os.path.join(HERE, "Figure_2.png")
+    f2 = os.path.join(HERE, "Figure_4.png")
     f3 = os.path.join(HERE, "Figure_3.png")
     dep_df, ov = build_figure_2(f2)
     bias_df = build_figure_3(f3)
@@ -286,7 +288,7 @@ def main():
         row = df.iloc[(df["target_censoring"] - target).abs().idxmin()]
         return row[col]
 
-    print("\n[Figure_2 panel A] depletion MAE (from table_depletion_mae.csv):")
+    print("\n[Figure_4 panel A] depletion MAE (from table_depletion_mae.csv):")
     print("  50%% protocol flat-KM tail : %.4f (manuscript ~0.0969)"
           % cell(dep_df, "mae_protocol_km_mean", 0.5))
     print("  50%% protocol Weibull tail : %.4f" % cell(dep_df, "mae_protocol_weib_mean", 0.5))
@@ -294,7 +296,7 @@ def main():
     print("  70%% protocol flat-KM tail : %.4f" % cell(dep_df, "mae_protocol_km_mean", 0.7))
     print("  30%% protocol flat-KM tail : %.4f" % cell(dep_df, "mae_protocol_km_mean", 0.3))
 
-    print("\n[Figure_2 panel B] overlay at ~30%% (reproduced, %d reps):" % ov["n_used"])
+    print("\n[Figure_4 panel B] overlay at ~30%% (reproduced, %d reps):" % ov["n_used"])
     h = ov["horizons"]
     pred_med = np.median(ov["protocol_km_stack"], axis=0)
     true_med = np.median(ov["true_stack"], axis=0)

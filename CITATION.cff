@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite both the article and this software record."
-title: "shelfsurv: a censoring-aware protocol for stock, time-on-shelf, and inventory-depletion reconstruction from unique-item resale event logs"
+title: "shelfsurv: a censoring-aware protocol for reconstructing stock, time-on-shelf, and inventory depletion from unique-item resale event logs"
 abstract: >-
   Reference implementation and reproducibility package for a MethodsX method
   article. Reconstructs month-end stock (accounting identity), censoring-aware
@@ -15,8 +15,8 @@ authors:
   - family-names: Goto
     given-names: Masayuki
     affiliation: "School of Creative Science and Engineering, Waseda University, Tokyo, Japan"
-version: "1.1.0"
-date-released: "2026-07-08"
+version: "1.1.1"
+date-released: "2026-07-09"
 license: MIT
 keywords:
   - inventory reconstruction
@@ -28,13 +28,10 @@ keywords:
 identifiers:
   - type: doi
     value: 10.5281/zenodo.21244011
-    description: "Concept DOI (all versions, resolves to the latest release)"
-  - type: doi
-    value: 10.5281/zenodo.21252852
-    description: "Version 1.1.0"
+    description: "Concept DOI (all versions; resolves to the latest release, including v1.1.1)"
 preferred-citation:
   type: article
-  title: "A censoring-aware protocol for reconstructing stock, time-on-shelf, and depletion from unique-item resale event logs"
+  title: "shelfsurv: a censoring-aware protocol for reconstructing stock, time-on-shelf, and inventory depletion from unique-item resale event logs"
   authors:
     - family-names: Shao
       given-names: Tengfei
